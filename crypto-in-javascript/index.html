@@ -1,0 +1,380 @@
+<html>
+  <head>
+    <meta name="viewport" content="width=1024">
+
+    <link rel="stylesheet" href="./imakewebthings-deck.js-46d52ce/core/deck.core.css" />
+    <link rel="stylesheet" href="./imakewebthings-deck.js-46d52ce/themes/style/neon.css" />
+    <link rel="stylesheet" href="./imakewebthings-deck.js-46d52ce/themes/transition/horizontal-slide.css" />
+
+    <title>Crypto in Javascript</title>
+
+    <style type="text/css">
+      .slide div {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body class="deck-container">
+
+    <div class="slide">
+      <h1>Crypto in Javascript</h1>
+
+      <hr />
+
+      <p>
+        <div><a href="http://www.dan-manges.com">www.dan-manges.com</a></div>
+        <div><a href="http://twitter.com/dan_manges">@dan_manges</a></div>
+      </p>
+
+      <hr />
+
+      <p>
+        <img src="braintree_darkbackground_small.png" />
+        <div><a href="http://www.braintreepayments.com">www.braintreepayments.com</a></div>
+        <div><a href="https://twitter.com/braintree">@braintree</a></div>
+      </p>
+    </div>
+
+    <div class="slide">
+      <h2>Quotes from a Cryptography Expert</h2>
+      <blockquote>
+        <p>Don't do it; it makes no sense</p>
+        <p><cite>Nate Lawson</cite></p>
+      </blockquote>
+
+      <blockquote>
+        <p>Remove the words "Javascript crypto" from your vocabulary</p>
+        <p><cite>Nate Lawson</cite></p>
+      </blockquote>
+
+      <blockquote>
+        <p>I made JS crypto a very minor part of the talk because I thought it would be obvious why it is a bad idea.</p>
+        <p><cite>Nate Lawson</cite></p>
+      </blockquote>
+    </div>
+
+    <div class="slide">
+      <h2>JS Crypto at Braintree</h2>
+      <ul>
+        <li>
+          <h3>PCI Compliance</h3>
+          <p>If you are a merchant of any size accepting credit cards, you must be in compliance with PCI Security Council standards.</p>
+        </li>
+        <li>
+          <h3>What's in Scope?</h3>
+          <p>storage? transmission?</p>
+        </li>
+        <li>
+          <h3>SAQ</h3>
+        </li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h2>More Quotes from a Cryptography Expert</h2>
+      <blockquote>
+        <p>I have only heard of one application of JS crypto that made sense, but it wasn't from a security perspective. A web firm processes credit card numbers...</p>
+        <p><cite>Nate Lawson</cite></p>
+        <!-- http://rdist.root.org/2010/11/29/final-post-on-javascript-crypto/ -->
+      </blockquote>
+    </div>
+
+    <div class="slide">
+      <h2>Other Considerations</h2>
+      <ul>
+        <li>Don't:
+          <ul>
+            <li>use Javascript to encrypt data from browser to server (use SSL)</li>
+          </ul>
+        </li>
+        <li>
+          Make sure:
+          <ul>
+            <li>your HTML and Javascript is served over SSL</li>
+          </ul>
+        </li>
+        <li>
+          Other potential uses:
+          <ul>
+            <li>password manager</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h2>Eliminating Transmission of Credit Card Data</h2>
+      <ul>
+        <li>
+          <h3>Transparent Redirect</h3>
+          <ul>
+            <li>Merchant hosts form</li>
+            <li>Form posts to Braintree</li>
+            <li>Braintree transparently redirects back to merchant</li>
+          </ul>
+        </li>
+        <li>
+          <h3>Client-Side Encryption</h3>
+          <ul>
+            <li>Javascript encrypted credit card data</li>
+            <li>Form data posted to merchant's server</li>
+            <li>Merchant uses Braintree's server-to-server API</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h2>Client-Side Encryption API</h2>
+      <pre>
+        <code>
+var braintree = Braintree.create("PUBLIC_ENCRYPTION_KEY");
+var encryptedValue = braintree.encrypt("sensitiveValue");
+        </code>
+      </pre>
+    </div>
+
+    <div class="slide">
+      <h2>Libraries</h2>
+      <ul>
+        <li>
+          Stanford Javascript Crypto Library
+          <ul>
+            <li>AES</li>
+            <li>http://crypto.stanford.edu/sjcl/</li>
+          </ul>
+        </li>
+        <li>
+          pidCrypt
+          <ul>
+            <li>https://www.pidder.com/pidcrypt/</li>
+            <li>RSA</li>
+            <li>utility functions</li>
+          </ul>
+        </li>
+        <li>
+          Ruby - OpenSSL
+        </li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h2>Client-Side Encryption using jQuery</h2>
+      <pre>
+        <code>
+$('#transaction_form').submit(function () {
+
+  $('#transaction_credit_card_number').val(
+    braintree.encrypt($('#transaction_credit_card_number').val())
+  );
+
+  $('#transaction_credit_card_cvv').val(
+    braintree.encrypt($('#transaction_credit_card_cvv').val())
+  );
+
+});
+        </code>
+      </pre>
+    </div>
+
+    <div class="slide">
+      <h2>Implementation</h2>
+      <ul>
+        <li>
+          <h3>Our Implementation</h3>
+          <ul>
+            <li>Generate a random AES key</li>
+            <li>Encrypt the credit card number using the AES key</li>
+            <li>Encrypt the AES key using RSA</li>
+            <li>Send the encrypted AES key and encrypted credit card number to Braintree</li>
+          </ul>
+        </li>
+        <li>
+          <h3>RSA</h3>
+          <ul>
+            <li>Asymmetric Encryption</li>
+            <li>Limited Plain Text Size</li>
+          </ul>
+        </li>
+        <li>
+          <h3>AES</h3>
+          <ul>
+            <li>Symmetric Encryption</li>
+            <li>Block Chaining for Unlimited Plain Text Size</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h2>Generating an RSA key (in Ruby)</h2>
+      <pre><code>
+key = OpenSSL::PKey::RSA.generate(2048)
+# public key
+key.public_key.to_pem
+# private key
+key.to_pem
+      </code></pre>
+      <pre>
+-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEAqVywFgmvkU2BS7deHWa9C0t6GAqx/Yflus6e1SYJMTIZ90fp
+eOBl5K7vdio0gWmRpt74X7ii6pZqU7c1LABrhKMdSWNNyOO60Qykji1dVFNAu3HV
+iv1k53YyAX4FgIDGFy/pnvPxwmTolysWp+mlz8GtrQxcwnTdpccnmD/nlawclH21
+gprTZ758YkioZZ9TsubVWzftsUons8K/ga0M/QkD/opTRKH7cnkGxhHz2OJhm8er
+K+8XoAN4g9RqJ7w9UbtDSFk2gMmY+lnWsZ/ZCn40UsNKuFX83VAKhzn47IkInnWs
+l1aoxHShfpbTXiJyxa1kCiH5vU50Ai7aw2ZexQIDAQABAoIBAQCa6pCbJ/LzW0zY
+i9wV2hDVX1ocu/bShXiI/5yCLieDlfFcB3OSAB7Hfh4RWY42M/nsM8dhlXIuafkK
+s401KQKBgQCw3rw4xQ+LlzhQIQxngnZo2fYEoJHxaMe5DjcR0dbzKN0OzhjZ4x3x
++vKdlxI+A/rIPNvOm5DxorMSHJH+cK8zTrWgN9mfyTQEgI5ODNhUj42M7MSpxaXD
+bkFcXSYm6en9dqIbM7zf6Y4gsawDXqNmliUKcoXkpZaqFU/KyWNf+A==
+-----END RSA PRIVATE KEY-----
+     </pre>
+    </div>
+
+    <div class="slide">
+      <h2>Initialization</h2>
+      <pre><code>
+Braintree.create = function (publicKey) {
+  var my = {
+    publicKey: publicKey
+  };
+      </code></pre>
+    </div>
+
+    <div class="slide">
+      <h2>Encrypt Function</h2>
+      <pre><code>
+var encrypt = function (text) {
+  var key = generateAesKey();
+  var aesEncryptedData = key.encrypt(text);
+
+  return "$bt2$" + key.encryptKeyWithRsa(rsaKey()) + "$" + aesEncryptedData;
+};
+      </code></pre>
+    </div>
+
+    <div class="slide">
+      <h2>RSA Initialization</h2>
+      <pre><code>
+var rsaKey = function () {
+  var key = pidCryptUtil.decodeBase64(my.publicKey);
+  var rsa = new pidCrypt.RSA();
+  var keyBytes = pidCryptUtil.toByteArray(key);
+  var asn = pidCrypt.ASN1.decode(keyBytes);
+  var tree = asn.toHexTree();
+  rsa.setPublicKeyFromASN(tree);
+
+  return rsa;
+};
+      </pre></code>
+    </div>
+
+    <div class="slide">
+      <h2>AES Key</h2>
+      <pre><code>
+var generateAesKey = function () {
+  return {
+    key: sjcl.random.randomWords(8, 0),
+    encrypt: function(plainText) {
+      var aes = new sjcl.cipher.aes(this.key);
+      var iv = sjcl.random.randomWords(4, 0);
+      var plainTextBits = sjcl.codec.utf8String.toBits(plainText);
+      var cipherTextBits = sjcl.mode.cbc.encrypt(aes, plainTextBits, iv);
+      return sjcl.codec.base64.fromBits(sjcl.bitArray.concat(iv, cipherTextBits));
+    },
+    encryptKeyWithRsa: function(rsaKey) {
+      var encryptedKeyHex = rsaKey.encryptRaw(sjcl.codec.base64.fromBits(this.key));
+      return pidCryptUtil.encodeBase64(pidCryptUtil.convertFromHex(encryptedKeyHex));
+    }
+  };
+};
+      </pre></code>
+    </div>
+
+    <div class="slide">
+      <h2>Encrypt Function (Again)</h2>
+      <pre><code>
+var encrypt = function (text) {
+  var key = generateAesKey();
+  var aesEncryptedData = key.encrypt(text);
+
+  return "$bt2$" + key.encryptKeyWithRsa(rsaKey()) + "$" + aesEncryptedData;
+};
+      </code></pre>
+    </div>
+
+    <div class="slide">
+      <h2>Decryption in Ruby</h2>
+      <pre><code>
+stripped_value = value.sub(pattern, '')
+encrypted_aes_key, cipher_text = stripped_value.split('$')
+aes_key_bytes = Base64.decode64(key.decrypt(Base64.decode64(encrypted_aes_key)))
+aes_key = Crypto::AesKey.new aes_key_bytes
+data_with_iv = Base64.decode64(cipher_text)
+aes_key.decrypt(data_with_iv)
+      </code></pre>
+    </div>
+
+    <div class="slide">
+      <h2>AES Decryption in Ruby</h2>
+      <pre><code>
+iv = data_with_iv[0,16]
+data = data_with_iv[16..-1]
+
+aes = OpenSSL::Cipher::Cipher.new('aes-256-cbc')
+aes.decrypt.key = @key
+aes.decrypt.iv = iv
+aes.update(data) + aes.final
+      </pre></code>
+    </div>
+
+    <div class="slide">
+      <h2>RSA Decryption in Ruby</h2>
+      <pre><code>
+@private_key = OpenSSL::PKey::RSA.new(attributes[:private_key])
+@private_key.private_decrypt(value)
+      </code></pre>
+    </div>
+
+    <div class="slide">
+      <h2>Get the Code</h2>
+      <p>https://github.com/braintree/braintree_client_side_encryption</p>
+    </div>
+
+    <div class="slide">
+      <h2>Thanks</h2>
+      <ul>
+        <li>
+          <h3>Braintree Dev Team</h3>
+          <ul>
+            <li>Patrick Schless</li>
+            <li>Paul Gross</li>
+            <li>Drew Olson</li>
+            <li>Hammer</li>
+            <li>Paul Hinze (Phinze)</li>
+            <li>Ali Aghareza</li>
+            <li>Tony Pitluga</li>
+            <li>Ben Mills</li>
+            <li>Cory Monty</li>
+            <li>Dave Pirotte</li>
+          </ul>
+        </li>
+        <li>
+          <h3>Special Mention</h3>
+          <ul>
+            <li>Ben Mills for suggesting I build these slides with Deck.js since this is a Javascript meetup</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.js"></script>
+    <script type="text/javascript" src="./imakewebthings-deck.js-46d52ce/core/deck.core.js"></script>
+    <script type="text/javascript">
+      $(function() {
+        $.deck('.slide');
+      });
+    </script>
+  </body>
+</html>
+
