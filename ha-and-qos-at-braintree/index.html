@@ -1,0 +1,133 @@
+<html>
+  <head>
+    <meta name="viewport" content="width=1024">
+
+    <link rel="stylesheet" href="./imakewebthings-deck.js-46d52ce/core/deck.core.css" />
+    <link rel="stylesheet" href="./imakewebthings-deck.js-46d52ce/themes/style/neon.css" />
+    <link rel="stylesheet" href="./imakewebthings-deck.js-46d52ce/themes/transition/horizontal-slide.css" />
+
+    <title>HA and QoS at Braintree</title>
+
+    <style type="text/css">
+      .slide div {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body class="deck-container">
+
+    <div class="slide">
+      <h1>HA and QoS at Braintree</h1>
+
+      <hr />
+
+      <p>
+        <div><a href="http://www.dan-manges.com">www.dan-manges.com</a></div>
+        <div><a href="http://twitter.com/dan_manges">@dan_manges</a></div>
+      </p>
+
+      <hr />
+
+      <p>
+        <img src="braintree_darkbackground_small.png" />
+        <div><a href="http://www.braintreepayments.com">www.braintreepayments.com</a></div>
+        <div><a href="https://twitter.com/braintree">@braintree</a></div>
+      </p>
+    </div>
+
+    <div class="slide">
+      <h2>Everybody Has Maintenance Windows</h2>
+
+      <ul>
+        <li>https://github.com/blog/655-scheduled-maintenance-today-22-00-pst (15m)</li>
+        <li>http://status.twitter.com/post/124145031/maintenance-window-tonight-9-45p-pacific (90m)</li>
+        <li>http://changelog.chargify.com/post/3942133797/short-downtime-tonight (15m)</li>
+        <li>http://blog.recurly.com/2011/06/planned-paypal-maintenance-outage-june-16th-2011/ (30m)</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h2>Even Paypal</h2>
+
+      <blockquote>
+        <p>"We will perform system maintenance on June 16, 2011 from 11:04 PM PT to approximately 11:30 PM PT.  During these 26 minutes, the PayPal website and PayPal APIs will be offline and your buyers will be unable to complete purchases.  Website Payments Pro Payflow Edition and Batch Processing (batch.paypal.com) will also be unavailable during this time."</p>
+      </blockquote>
+    </div>
+
+    <div class="slide">
+      <h2>Braintree's Secret</h2>
+      <ul>
+        <li>Be able to perform downtime-inducing maintenance in less than 30 seconds (helpful: PostgreSQL).</li>
+        <li>Suspend traffic (a slow transaction is better than a 503 response).</li>
+        <li>Automate infrastructure changes.</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h2>Implementation</h2>
+      <ul>
+        <li>
+          Broxy (Python, Tornado):
+          <ul>
+            <li>accept requests</li>
+            <li>put them into Redis</li>
+            <li>pop from response queue</li>
+          </ul>
+        </li>
+        <li>
+          Dispatcher (Ruby):
+          <ul>
+            <li>pick up requests from Redis</li>
+            <li>convert to Rack hash and process through Rails</li>
+            <li>push response back to Redis</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h2>Quality of Service</h2>
+      <ul>
+        <li>Don't want to return 4xx or 5xx if a merchant exceed rate limit.</li>
+        <li>Instead we want to slow them down without affecting everybody else.</li>
+        <li>Because single broxy process, can dispatch requests in a different order than they come in.</li>
+        <li>Our HTTP requests aren't always FIFO.</li>
+        <li>Fair Share Scheduling (http://en.wikipedia.org/wiki/Fair-share_scheduling)</li>
+      </ul>
+    </div>
+
+    <div class="slide">
+      <h2>Thanks</h2>
+      <p>
+        <img src="braintree_darkbackground_small.png" />
+        <div><a href="http://www.braintreepayments.com">www.braintreepayments.com</a></div>
+        <div><a href="https://twitter.com/braintree">@braintree</a></div>
+      </p>
+      <ul>
+        <li>The Braintree Dev Team:
+          <ul>
+            <li>Patrick Schless</li>
+            <li>Paul Gross</li>
+            <li>Drew Olson</li>
+            <li>Hammer</li>
+            <li>Paul Hinze (Phinze)</li>
+            <li>Ali Aghareza</li>
+            <li>Tony Pitluga</li>
+            <li>Ben Mills</li>
+            <li>Cory Monty</li>
+            <li>Dave Pirotte</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.1/jquery.js"></script>
+    <script type="text/javascript" src="./imakewebthings-deck.js-46d52ce/core/deck.core.js"></script>
+    <script type="text/javascript">
+      $(function() {
+        $.deck('.slide');
+      });
+    </script>
+  </body>
+</html>
+
